@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace DotNgApp.Controllers
+namespace DotNg.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
