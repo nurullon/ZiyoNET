@@ -1,5 +1,9 @@
-﻿namespace DotNg.Infrastructure.Data;
+﻿using DotNg.Infrastructure.Authentication.Identity.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
-public class AppDbContext
+namespace DotNg.Infrastructure.Data;
+
+public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<AppUser>(options)
 {
 }

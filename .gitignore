@@ -398,3 +398,4 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+/backend/DotNgApp/DotNg.API/appsettings.Development.json
