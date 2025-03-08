@@ -2,8 +2,6 @@
 using DotNg.API.Configurations.Jwt;
 using DotNg.Infrastructure.Authentication.Identity.Models;
 using DotNg.Infrastructure.Data;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,34 +29,7 @@ builder.Services.AddInfrastructure();
 
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.ConfigureGoogle(builder.Configuration);
-
-//builder.Services.AddAuthentication(options =>
-//{
-//    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-//    options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
-//})
-//.AddCookie(options =>
-//{
-//    options.Events.OnRedirectToAccessDenied = context =>
-//    {
-//        context.Response.StatusCode = 403;
-//        return Task.CompletedTask;
-//    };
-//    options.Events.OnRedirectToLogin = context =>
-//    {
-//        context.Response.StatusCode = 401;
-//        return Task.CompletedTask;
-//    };
-//})
-//.AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
-//{
-//    options.ClientId = "182502122629-jendgi2jbor8unvh2a9jc0b17iqf16gl.apps.googleusercontent.com";
-//    options.ClientSecret = "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";
-//    options.CallbackPath = "/signin-google";
-//    options.SaveTokens = true;
-//    options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-//});
+builder.Services.ConfigureAuth(builder.Configuration);
 
 builder.Services.ConfigureServices();
 

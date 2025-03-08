@@ -71,7 +71,7 @@ public class AuthService(UserManager<AppUser> userManager,
         return Result<LoginResponse>.Success(response);
     }
 
-    public async Task<Result<LoginResponse>> ExternalLoginAsync(ExternalLoginRequest request)
+    public async Task<Result<LoginResponse>> ExternalLoginAsync(ExternalLoginRequest request, string provider)
     {
         var user = await userManager.FindByEmailAsync(request.Email);
         if (user == null)
@@ -86,9 +86,9 @@ public class AuthService(UserManager<AppUser> userManager,
         }
 
         var userLoginInfo = await userManager.GetLoginsAsync(user);
-        if (!userLoginInfo.Any(l => l.LoginProvider == "Google"))
+        if (!userLoginInfo.Any(l => l.LoginProvider == provider))
         {
-            var loginInfo = new UserLoginInfo("Google", request.Email, "Google");
+            var loginInfo = new UserLoginInfo(provider, request.Email, provider);
             await userManager.AddLoginAsync(user, loginInfo);
         }
 

@@ -9,14 +9,14 @@ namespace DotNg.Infrastructure.Serialization;
 
 public class ResponseSerializer(ILogger<ResponseSerializer> logger)
 {
-    public ObjectResult Serialize(Result result)
+    public ObjectResult ToActionResult(Result result)
     {
         return result.IsSuccess
             ? CreateSuccessResponse(null)
             : CreateErrorResponse(result.Error);
     }
 
-    public ObjectResult Serialize<T>(Result<T> result)
+    public ObjectResult ToActionResult<T>(Result<T> result)
     {
         return result.IsSuccess
             ? CreateSuccessResponse(result.Value)

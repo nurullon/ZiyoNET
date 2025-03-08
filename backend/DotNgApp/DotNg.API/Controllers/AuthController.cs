@@ -2,77 +2,35 @@
 using DotNg.Infrastructure.Authentication.Identity.Interfaces;
 using DotNg.Infrastructure.Serialization;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Mvc;
-
-//[Route("api/auth")]
-//[ApiController]
-//public class AuthController(ResponseSerializer responseSerializer, IAuthService authService) : Controller
-//{
-//    [HttpPost("register")]
-//    public async Task<IActionResult> Register([FromBody] RegisterRequest model)
-//    {
-//        return responseSerializer.Serialize(await authService.RegisterAsync(model));
-//    }
-
-//    [HttpPost("login")]
-//    public async Task<IActionResult> Login([FromBody] LoginRequest model)
-//    {
-//        return responseSerializer.Serialize(await authService.LoginAsync(model));
-//    }
-
-//    [HttpGet("google-login")]
-//    public IActionResult GoogleLogin()
-//    {
-//        var redirectUri = Url.Action("GoogleResponse", "Auth", null, Request.Scheme);
-//        var properties = new AuthenticationProperties { RedirectUri = redirectUri };
-//        return Challenge(properties, GoogleDefaults.AuthenticationScheme);
-//    }
-
-//    [HttpGet("signin-google")]
-//    public async Task<IActionResult> GoogleResponse()
-//    {
-//        var authenticateResult = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-//        if (!authenticateResult.Succeeded) return BadRequest("Google authentication failed.");
-
-//        var user = authenticateResult.Principal;
-//        if (user == null || !user.Identity.IsAuthenticated)
-//        {
-//            return Unauthorized("User is not authenticated.");
-//        }
-
-//        var email = user.FindFirst(ClaimTypes.Email)?.Value;
-//        var name = user.FindFirst(ClaimTypes.Name)?.Value;
-
-//        var loginRequest = new ExternalLoginRequest { Email = email, Name = name ?? "Unknown" };
-//        var token = await authService.ExternalLoginAsync(loginRequest);
-
-//        return Ok(new { email, name });
-//    }
-//}
-
+using System.Security.Claims;
 
 [Route("api/auth")]
 [ApiController]
-public class AuthController(ResponseSerializer responseSerializer, 
+public class AuthController(ResponseSerializer responseSerializer,
     IAuthService authService,
-    IGoogleAuthService  googleAuthService) : Controller
+    IFacebookAuthService facebookAuthService,
+    IGoogleAuthService googleAuthService) : Controller
 {
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest model)
     {
-        return responseSerializer.Serialize(await authService.RegisterAsync(model));
+        return responseSerializer.ToActionResult(await authService.RegisterAsync(model));
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest model)
     {
-        return responseSerializer.Serialize(await authService.LoginAsync(model));
+        return responseSerializer.ToActionResult(await authService.LoginAsync(model));
     }
 
     [HttpGet("google-login")]
     public IActionResult GoogleLogin()
     {
+        
         var redirectUri = Url.Action("GoogleResponse", "Auth", null, Request.Scheme);
         var properties = new AuthenticationProperties { RedirectUri = redirectUri };
         return Challenge(properties, GoogleDefaults.AuthenticationScheme);
@@ -81,6 +39,64 @@ public class AuthController(ResponseSerializer responseSerializer,
     [HttpGet("signin-google")]
     public async Task<IActionResult> GoogleResponse()
     {
-        return responseSerializer.Serialize(await googleAuthService.HandleGoogleLoginAsync(HttpContext));
+        var authenticateResult = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
+        if (!authenticateResult.Succeeded)
+            return Unauthorized("Facebook authentication failed");
+
+        var user = authenticateResult.Principal;
+        if (user == null || !user.Identity?.IsAuthenticated == true)
+            return Unauthorized("User is not authenticated");
+
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.Name, user.FindFirst(ClaimTypes.Name)?.Value ?? "Unknown"),
+            new(ClaimTypes.Email, user.FindFirst(ClaimTypes.Email)?.Value ?? ""),
+            new(ClaimTypes.NameIdentifier, user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? ""),
+        };
+
+        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var authProperties = new AuthenticationProperties { IsPersistent = true };
+
+        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+                                      new ClaimsPrincipal(claimsIdentity),
+                                      authProperties);
+
+        return responseSerializer.ToActionResult(await googleAuthService.HandleGoogleLoginAsync(HttpContext));
+    }
+
+    [HttpGet("facebook-login")]
+    public IActionResult FacebookLogin()
+    {
+        var redirectUri = Url.Action("FacebookResponse", "Auth", null, Request.Scheme);
+        var properties = new AuthenticationProperties { RedirectUri = redirectUri };
+        return Challenge(properties, FacebookDefaults.AuthenticationScheme);
+    }
+
+    [HttpGet("signin-facebook")]
+    public async Task<IActionResult> FacebookResponse()
+    {
+        var authenticateResult = await HttpContext.AuthenticateAsync(FacebookDefaults.AuthenticationScheme);
+        if (!authenticateResult.Succeeded)
+            return Unauthorized("Facebook authentication failed");
+
+        var user = authenticateResult.Principal;
+        if (user == null || !user.Identity?.IsAuthenticated == true)
+            return Unauthorized("User is not authenticated");
+
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.Name, user.FindFirst(ClaimTypes.Name)?.Value ?? "Unknown"),
+            new(ClaimTypes.Email, user.FindFirst(ClaimTypes.Email)?.Value ?? ""),
+            new(ClaimTypes.NameIdentifier, user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? ""),
+        };
+
+        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var authProperties = new AuthenticationProperties { IsPersistent = true };
+
+        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+                                      new ClaimsPrincipal(claimsIdentity),
+                                      authProperties);
+
+        return responseSerializer.ToActionResult(await facebookAuthService.HandleFacebookLoginAsync(HttpContext));
     }
 }
