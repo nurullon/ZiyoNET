@@ -1,7 +1,7 @@
 ﻿using DotNg.Application.Models.Auth;
 using DotNg.Domain.Common;
 
-namespace DotNg.Infrastructure.Authentication.Identity.Interfaces;
+namespace DotNg.Application.Services.Auth.Interfaces;
 
 public interface IAuthService
 {

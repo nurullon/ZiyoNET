@@ -1,10 +1,16 @@
 ﻿using DotNg.API.Infrastructure;
+using DotNg.Application.Services;
+using DotNg.Application.Services.Auth;
+using DotNg.Application.Services.Auth.Interfaces;
 using DotNg.Domain.Interfaces;
 using DotNg.Infrastructure.Authentication.Identity;
 using DotNg.Infrastructure.Authentication.Identity.Interfaces;
+using DotNg.Infrastructure.Authentication.Identity.Models;
 using DotNg.Infrastructure.Authentication.Jwt;
+using DotNg.Infrastructure.Data;
 using DotNg.Infrastructure.Security;
 using DotNg.Infrastructure.Serialization;
+using Microsoft.AspNetCore.Identity;
 
 namespace DotNg.API.Configurations;
 
@@ -25,8 +31,10 @@ public static class DependencyInjection
 
         // Register Service
         services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
-        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IJwtService, JwtService>();
+
+        services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IGoogleAuthService, GoogleAuthService>();
         services.AddScoped<IFacebookAuthService, FacebookAuthService>();
     }

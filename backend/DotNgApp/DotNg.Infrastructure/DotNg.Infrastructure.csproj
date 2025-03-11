@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DotNg.Application\DotNg.Application.csproj" />
+    <ProjectReference Include="..\DotNg.Domain\DotNg.Domain.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,13 +1,13 @@
 ﻿using DotNg.Application.Models.Auth;
+using DotNg.Application.Services.Auth.Interfaces;
 using DotNg.Domain.Common;
 using DotNg.Domain.Common.Errors;
-using DotNg.Infrastructure.Authentication.Identity.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 
-namespace DotNg.Infrastructure.Authentication.Identity;
+namespace DotNg.Application.Services.Auth;
 
 public class GoogleAuthService(IAuthService authService) : IGoogleAuthService
 {

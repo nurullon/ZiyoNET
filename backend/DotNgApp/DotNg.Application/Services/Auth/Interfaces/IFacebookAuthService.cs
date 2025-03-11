@@ -2,7 +2,7 @@
 using DotNg.Domain.Common;
 using Microsoft.AspNetCore.Http;
 
-namespace DotNg.Infrastructure.Authentication.Identity.Interfaces;
+namespace DotNg.Application.Services.Auth.Interfaces;
 
 public interface IFacebookAuthService
 {
