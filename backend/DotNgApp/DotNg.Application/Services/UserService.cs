@@ -1,4 +1,5 @@
 ﻿using DotNg.Application.Models;
+using DotNg.Application.Models.RoleDto;
 using DotNg.Application.Models.UserDto;
 using DotNg.Domain.Common;
 using DotNg.Infrastructure.Authentication.Identity.Interfaces;
@@ -29,6 +30,33 @@ public class UserService(IIdentityService identityService) : IUserService
         }).ToList();
 
         var listResponse = new ListResponse<UserResponse>(response, totalCount, pageNumber, pageSize);
+        return Result<ListResponse<UserResponse>>.Success(listResponse);
+    }
+
+    public async Task<Result<ListResponse<UserResponse>>> GetAllUsersAsync()
+    {
+        var query = identityService.GetUsers();
+        var totalCount = await query.CountAsync();
+
+        var users = await query.ToListAsync();
+
+        var response = new List<UserResponse>();
+        foreach (var user in users)
+        {
+            var role = await identityService.GetRoleAsync(user);
+            var userResponse = new UserResponse
+            {
+                UserName = user.UserName ?? string.Empty,
+                Email = user.Email ?? string.Empty,
+                Name = user.Name ?? string.Empty,
+                Id = user.Id,
+                Role = role ?? string.Empty
+            };
+
+            response.Add(userResponse);
+        }
+
+        var listResponse = new ListResponse<UserResponse>(response, totalCount, null, null);
         return Result<ListResponse<UserResponse>>.Success(listResponse);
     }
 }

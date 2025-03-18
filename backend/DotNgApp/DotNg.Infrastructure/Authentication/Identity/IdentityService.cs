@@ -57,4 +57,10 @@ public class IdentityService(UserManager<AppUser> userManager,
     {
         return userManager.Users;
     }
+
+    public async Task<string?> GetRoleAsync(AppUser user)
+    {
+        var roles = await userManager.GetRolesAsync(user);
+        return roles.FirstOrDefault();
+    }
 }

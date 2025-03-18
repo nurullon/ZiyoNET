@@ -1,6 +1,6 @@
 ﻿using DotNg.Application.Models.Auth;
+using DotNg.Application.Serialization;
 using DotNg.Application.Services.Auth.Interfaces;
-using DotNg.Infrastructure.Serialization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Facebook;
@@ -32,7 +32,7 @@ public class AuthController(ResponseSerializer responseSerializer,
     [HttpGet("google-login")]
     public IActionResult GoogleLogin()
     {
-        
+
         var redirectUri = Url.Action("GoogleResponse", "Auth", null, Request.Scheme);
         var properties = new AuthenticationProperties { RedirectUri = redirectUri };
         return Challenge(properties, GoogleDefaults.AuthenticationScheme);
@@ -63,7 +63,14 @@ public class AuthController(ResponseSerializer responseSerializer,
                                       new ClaimsPrincipal(claimsIdentity),
                                       authProperties);
 
-        return responseSerializer.ToActionResult(await googleAuthService.HandleGoogleLoginAsync(HttpContext));
+        var response = await googleAuthService.HandleGoogleLoginAsync(HttpContext);
+
+        return Content($@"
+        <script>
+            window.opener.postMessage({{ token: '{response.Value?.Token}' }}, 'https://localhost:4200');
+            window.close();
+        </script>",
+        "text/html");
     }
 
     [HttpGet("facebook-login")]
@@ -99,6 +106,13 @@ public class AuthController(ResponseSerializer responseSerializer,
                                       new ClaimsPrincipal(claimsIdentity),
                                       authProperties);
 
-        return responseSerializer.ToActionResult(await facebookAuthService.HandleFacebookLoginAsync(HttpContext));
+        var response = await facebookAuthService.HandleFacebookLoginAsync(HttpContext);
+        return Content($@"
+        <script>
+            window.opener.postMessage({{ success: true, token: '{response.Value?.Token}' }}, 'https://localhost:4200');
+            window.close();
+        </script>",
+        "text/html");
+
     }
 }

@@ -1,0 +1,13 @@
+﻿using AutoMapper;
+using DotNg.Application.Models.Auth;
+using DotNg.Infrastructure.Authentication.Identity.Models;
+
+namespace DotNg.Application.Mappers;
+
+public class UserProfile : Profile
+{
+    public UserProfile()
+    {
+        CreateMap<AppUser, CustomUserResponse>();
+    }
+}

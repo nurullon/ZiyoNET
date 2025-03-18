@@ -1,4 +1,5 @@
-﻿using DotNg.Application.Models.Auth;
+﻿using AutoMapper;
+using DotNg.Application.Models.Auth;
 using DotNg.Application.Services.Auth.Interfaces;
 using DotNg.Domain.Common;
 using DotNg.Domain.Common.Errors;
@@ -13,19 +14,20 @@ namespace DotNg.Application.Services.Auth;
 
 public class AuthService(IIdentityService identityService, 
     IPasswordHasher passwordHasher, 
+    IMapper mapper,
     IJwtService jwtService) : IAuthService
 {
     public async Task<Result<LoginResponse>> RegisterAsync(RegisterRequest model)
     {
-        var userExists = await identityService.FindByEmailAsync(model.Email);
+        var userExists = await identityService.FindByEmailAsync(model.UserName);
         if (userExists != null)
             return Result.Fail<LoginResponse>(new UserError(ErrorCodes.AlreadyExists, "User already exists"));
 
         var user = new AppUser
         {
-            UserName = model.Email,
-            Email = model.Email,
-            Name = model.Name
+            UserName = model.UserName,
+            Email = model.UserName,
+            Name = model.Name ?? string.Empty
         };
 
         var result = await identityService.CreateUserAsync(user, model.Password);
@@ -37,12 +39,18 @@ public class AuthService(IIdentityService identityService,
         var token = jwtService.GenerateToken(user);
         await SaveUserToken(user, token);
 
-        return Result<LoginResponse>.Success(new LoginResponse { Token = token, Name = user.Name, Email = user.Email });
+        var response = new LoginResponse
+        {
+            Token = token,
+            User = mapper.Map<CustomUserResponse>(user)
+        };
+
+        return Result<LoginResponse>.Success(response);
     }
 
     public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request)
     {
-        var user = await identityService.FindByEmailAsync(request.Email);
+        var user = await identityService.FindByEmailAsync(request.UserName);
         if (user == null)
             return Result.Fail<LoginResponse>(new UserError(ErrorCodes.NotFound, UserErrorMessages.UserNotFound));
 
@@ -52,7 +60,13 @@ public class AuthService(IIdentityService identityService,
         var token = jwtService.GenerateToken(user);
         await SaveUserToken(user, token);
 
-        return Result<LoginResponse>.Success(new LoginResponse { Token = token, Name = user.Name, Email = user.Email });
+        var response = new LoginResponse
+        {
+            Token = token,
+            User = mapper.Map<CustomUserResponse>(user)
+        };
+
+        return Result<LoginResponse>.Success(response);
     }
 
     public async Task<Result<LoginResponse>> ExternalLoginAsync(ExternalLoginRequest request, string provider)
@@ -75,7 +89,13 @@ public class AuthService(IIdentityService identityService,
         var token = jwtService.GenerateToken(user);
         await SaveUserToken(user, token);
 
-        return Result<LoginResponse>.Success(new LoginResponse { Token = token, Name = user.Name, Email = user.Email });
+        var response = new LoginResponse
+        {
+            Token = token,
+            User = mapper.Map<CustomUserResponse>(user)
+        };
+
+        return Result<LoginResponse>.Success(response);
     }
 
     private async Task SaveUserToken(AppUser user, string token)

@@ -4,5 +4,5 @@ namespace DotNg.Infrastructure.Authentication.Identity.Models;
 
 public class AppUser : IdentityUser
 {
-    public string Name { get; set; } =string.Empty;
+    public string Name { get; set; } = string.Empty;
 }

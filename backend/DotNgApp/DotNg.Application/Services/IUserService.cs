@@ -7,4 +7,5 @@ namespace DotNg.Application.Services;
 public interface IUserService
 {
     Task<Result<ListResponse<UserResponse>>> GetAllUsersAsync(UserFilterRequest request);
+    Task<Result<ListResponse<UserResponse>>> GetAllUsersAsync();
 }

@@ -15,4 +15,5 @@ public interface IIdentityService
     Task SetAuthenticationTokenAsync(AppUser user, string tokenName, string token);
     Task RemoveAuthenticationTokenAsync(AppUser user, string tokenName);
     IQueryable<AppUser> GetUsers();
+    Task<string?> GetRoleAsync(AppUser user);
 }

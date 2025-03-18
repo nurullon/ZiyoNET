@@ -1,6 +1,6 @@
-﻿using Microsoft.OpenApi.Models;
+﻿namespace DotNg.API.Configurations;
 
-namespace DotNg.API.Configurations;
+using Microsoft.OpenApi.Models;
 
 public static class SwaggerConfiguration
 {
@@ -10,14 +10,13 @@ public static class SwaggerConfiguration
         {
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
                 Scheme = "Bearer",
                 BearerFormat = "JWT",
                 In = ParameterLocation.Header,
-                Name = "Authorization",
-                Description = "Bearer Authentication with JWT Token",
-                Type = SecuritySchemeType.Http
+                Description = "Enter 'Bearer' [space] and then your token in the text input below."
             });
-
             options.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
                 {
@@ -25,11 +24,11 @@ public static class SwaggerConfiguration
                     {
                         Reference = new OpenApiReference
                         {
-                            Id = "Bearer",
-                            Type = ReferenceType.SecurityScheme
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
                         }
                     },
-                    new List<string>()
+                    Array.Empty<string>()
                 }
             });
         });

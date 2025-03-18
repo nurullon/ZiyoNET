@@ -1,5 +1,4 @@
 ﻿using DotNg.API.Configurations;
-using DotNg.API.Configurations.Jwt;
 using DotNg.Infrastructure.Authentication.Identity.Models;
 using DotNg.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
@@ -10,7 +9,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.ConfigureSwagger();
+
+
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -19,23 +21,16 @@ builder.Services.AddIdentity<AppUser, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
+builder.Services.ConfigureAuthentication(builder.Configuration);
 builder.Services.AddAuthorization();
 
-builder.Services.ConfigureJWTService();
-
-builder.Services.ConfigureSwagger();
-
 builder.Services.AddInfrastructure();
-
 builder.Services.AddHttpContextAccessor();
-
-builder.Services.ConfigureAuth(builder.Configuration);
-
 builder.Services.ConfigureServices();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAllOrigins", policy =>
+    options.AddPolicy("AllowAll", policy =>
     {
         policy.AllowAnyOrigin()
               .AllowAnyMethod()
@@ -53,11 +48,11 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 
 app.UseHttpsRedirection();
 
-app.UseCors("AllowAllOrigins");
+app.UseRouting();
+
+app.UseCors("AllowAll");
 
 app.UseExceptionHandler();
-
-app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
