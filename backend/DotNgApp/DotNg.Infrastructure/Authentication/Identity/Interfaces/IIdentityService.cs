@@ -17,6 +17,7 @@ public interface IIdentityService
     Task UpdateUserAsync(AppUser user);
     Task<bool> DeleteUserAsync(AppUser user);
     Task AddToRoleAsync(AppUser user, string role);
+    Task<bool> UpdateUserRoleAsync(AppUser user, string newRole);
     Task<Role?> GetRoleAsync(AppUser user);
     IQueryable<Role> GetRoles();
 }

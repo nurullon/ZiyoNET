@@ -33,7 +33,7 @@ public class JwtService(IOptions<JwtOptions> options, UserManager<AppUser> userM
         claims.AddRange(userRoles.Select(role => new Claim(ClaimTypes.Role, role)));
 
         var signingCredentials = new SigningCredentials(
-            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!)),
             SecurityAlgorithms.HmacSha256);
 
         var jwt = new JwtSecurityToken(

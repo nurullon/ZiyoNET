@@ -26,7 +26,15 @@ public class IdentityService(UserManager<AppUser> userManager,
         await userManager.AddToRoleAsync(user, role);
     }
 
-    //public async Task UpdateUserRoleAsync()
+    public async Task<bool> UpdateUserRoleAsync(AppUser user, string newRole)
+    {
+        var currentRoles = await userManager.GetRolesAsync(user);
+        var removeResult = await userManager.RemoveFromRolesAsync(user, currentRoles);
+        if (!removeResult.Succeeded) return false;
+
+        var addResult = await userManager.AddToRoleAsync(user, newRole);
+        return addResult.Succeeded;
+    }
 
     public async Task<IList<UserLoginInfo>> GetLoginsAsync(AppUser user)
     {

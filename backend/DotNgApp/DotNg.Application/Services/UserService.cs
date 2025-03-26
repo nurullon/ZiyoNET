@@ -101,7 +101,7 @@ public class UserService(IIdentityService identityService,
                 ErrorCodes.NotFound,
                 UserErrorMessages.RoleNotFound));
 
-        await identityService.AddToRoleAsync(user, role.Name);
+        await identityService.UpdateUserRoleAsync(user, role.Name);
 
         return Result<UserResponse>.Success(new UserResponse
         {
