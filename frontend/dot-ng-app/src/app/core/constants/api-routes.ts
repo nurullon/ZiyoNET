@@ -4,8 +4,8 @@ export const API_ROUTES = {
       REGISTER: 'api/auth/register',
     },
     USERS: {
-      GET_PROFILE: 'api/users/profile',
-      UPDATE_PROFILE: 'api/users/update',
+      API_USERS: 'api/users',
+      API_ROLES: 'api/users/roles',
     },
   };
   

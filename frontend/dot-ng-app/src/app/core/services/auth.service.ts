@@ -18,6 +18,7 @@ export class AuthService {
     const data = { userName, password };
     const result = await this.api.post<LoginResponse>(API_ROUTES.AUTH.LOGIN, data);
     
+    console.log('Login result:', result);
     if (result.success && result.data) {
       localStorage.setItem('authToken', result.data.token);
 
@@ -29,6 +30,11 @@ export class AuthService {
 
   isAuthenticated(): boolean {
     return !!localStorage.getItem('authToken');
+  }
+
+  logout(): void {
+    localStorage.removeItem('authToken'); 
+    this.router.navigate(['/login']);
   }
 
   loginGoogle(): Promise<void> {
