@@ -1,5 +1,4 @@
-﻿using DotNg.Application.Models.Errors;
-using DotNg.Domain.Common;
+﻿using DotNg.Domain.Common;
 using DotNg.Domain.Common.Errors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -10,76 +9,71 @@ namespace DotNg.Application.Serialization;
 
 public class ResponseSerializer(ILogger<ResponseSerializer> logger)
 {
-    public ObjectResult ToActionResult(object? value)
-    {
-        return StatusCode((int)HttpStatusCode.OK, new
-        {
-            SuccessResult = value
-        });
-    }
-
     public ObjectResult ToActionResult(Result result)
     {
-        if (result.IsSuccess)
-            return StatusCode((int)HttpStatusCode.OK, null);
-
-        return SerializeErrorResult(result);
+        return result.IsSuccess
+            ? CreateSuccessResponse(null)
+            : CreateErrorResponse(result.Error);
     }
 
     public ObjectResult ToActionResult<T>(Result<T> result)
     {
-        if (result.IsSuccess)
-            return SerializeSuccessResult(result);
-
-        return SerializeErrorResult(result);
+        return result.IsSuccess
+            ? CreateSuccessResponse(result.Value)
+            : CreateErrorResponse(result.Error);
     }
 
-
-    private ObjectResult SerializeSuccessResult<T>(Result<T> result)
+    public static ObjectResult SerializeSuccess(object? value)
     {
-        return StatusCode((int)HttpStatusCode.OK, new
-        {
-            SuccessResult = result.Value,
-        });
+        return CreateSuccessResponse(value);
     }
 
-    private static ObjectResult StatusCode(int statusCode, object? value)
+    private static ObjectResult CreateSuccessResponse(object? value)
     {
-        return new(value)
+        return new ObjectResult(new { success = true, data = value })
         {
-            StatusCode = statusCode
+            StatusCode = (int)HttpStatusCode.OK
         };
     }
 
-    private static  ObjectResult InternalServerError()
+    private ObjectResult CreateErrorResponse(Error? error)
     {
-        return StatusCode((int)HttpStatusCode.InternalServerError, new ErrorResponse(ErrorCodes.InternalServerError, "Internal server error"));
-    }
+        if (error == null)
+        {
+            logger.LogError("An unknown error occurred.");
+            return CreateInternalServerError();
+        }
 
-    private ObjectResult SerializeErrorResult(Result result)
-    {
-        return SerializeError(result.Error);
-    }
+        logger.LogError("Error occurred: {Error}", JsonSerializer.Serialize(error));
 
-    private  ObjectResult SerializeError(Error? error)
-    {
+
         switch (error)
         {
-            case ValidationError validationError:
-                return StatusCode((int)HttpStatusCode.UnprocessableContent,
-                    new ErrorResponse(validationError.Code, validationError.Message)
-                    {
-                        Errors = validationError.Errors
-                    });
             case UnauthorizedError:
-                return StatusCode((int)HttpStatusCode.Unauthorized, new ErrorResponse(error.Code, error.Message));
+                return CreateErrorResponse(HttpStatusCode.Unauthorized, error);
             case UserError:
-                return StatusCode((int)HttpStatusCode.BadRequest, new ErrorResponse(error.Code, error.Message));
+
+                return CreateErrorResponse(HttpStatusCode.BadRequest, error);
             case ServiceError:
-                return InternalServerError();
+                return CreateInternalServerError();
             default:
-                logger.LogError("Error occurred: {Error}", JsonSerializer.Serialize(error));
-                return InternalServerError();
+                return CreateInternalServerError();
         }
+    }
+
+    private static ObjectResult CreateErrorResponse(HttpStatusCode statusCode, Error error)
+    {
+        return new ObjectResult(new { success = false, error = new { error.Code, error.Message } })
+        {
+            StatusCode = (int)statusCode
+        };
+    }
+
+    private static ObjectResult CreateInternalServerError()
+    {
+        return new ObjectResult(new { success = false, error = new { code = ErrorCodes.InternalServerError, message = "Internal server error" } })
+        {
+            StatusCode = (int)HttpStatusCode.InternalServerError
+        };
     }
 }

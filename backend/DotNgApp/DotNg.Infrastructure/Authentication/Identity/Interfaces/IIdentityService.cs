@@ -7,7 +7,6 @@ public interface IIdentityService
 {
     Task<AppUser?> FindByEmailAsync(string email);
     Task<IdentityResult> CreateUserAsync(AppUser user, string password);
-    Task AddToRoleAsync(AppUser user, string role);
     Task<IList<UserLoginInfo>> GetLoginsAsync(AppUser user);
     Task AddLoginAsync(AppUser user, UserLoginInfo loginInfo);
     Task SignInAsync(AppUser user);
@@ -15,5 +14,9 @@ public interface IIdentityService
     Task SetAuthenticationTokenAsync(AppUser user, string tokenName, string token);
     Task RemoveAuthenticationTokenAsync(AppUser user, string tokenName);
     IQueryable<AppUser> GetUsers();
-    Task<string?> GetRoleAsync(AppUser user);
+    Task UpdateUserAsync(AppUser user);
+    Task<bool> DeleteUserAsync(AppUser user);
+    Task AddToRoleAsync(AppUser user, string role);
+    Task<Role?> GetRoleAsync(AppUser user);
+    IQueryable<Role> GetRoles();
 }

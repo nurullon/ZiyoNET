@@ -1,11 +1,14 @@
 ﻿using DotNg.Infrastructure.Authentication.Identity.Interfaces;
 using DotNg.Infrastructure.Authentication.Identity.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace DotNg.Infrastructure.Authentication.Identity;
 
 public class IdentityService(UserManager<AppUser> userManager, 
-    SignInManager<AppUser> signInManager) : IIdentityService
+    SignInManager<AppUser> signInManager,
+    RoleManager<IdentityRole> roleManager) : IIdentityService
 {
     public async Task<AppUser?> FindByEmailAsync(string email)
     {
@@ -22,6 +25,8 @@ public class IdentityService(UserManager<AppUser> userManager,
     {
         await userManager.AddToRoleAsync(user, role);
     }
+
+    //public async Task UpdateUserRoleAsync()
 
     public async Task<IList<UserLoginInfo>> GetLoginsAsync(AppUser user)
     {
@@ -58,9 +63,38 @@ public class IdentityService(UserManager<AppUser> userManager,
         return userManager.Users;
     }
 
-    public async Task<string?> GetRoleAsync(AppUser user)
+    public async Task<Role?> GetRoleAsync(AppUser user)
     {
-        var roles = await userManager.GetRolesAsync(user);
+        var roleNames = await userManager.GetRolesAsync(user);
+
+        var roles = roleManager.Roles
+            .Where(role => roleNames.Contains(role.Name ?? string.Empty))
+            .Select(r => new Role
+            {
+                Id = r.Id,
+                Name = r.Name ?? string.Empty
+            });
+
         return roles.FirstOrDefault();
+    }
+
+    public IQueryable<Role> GetRoles()
+    {
+        var rolesWithId = roleManager.Roles.Select(role => new Role { Id = role.Id, Name = role.Name ?? string.Empty });
+        return rolesWithId;
+    }
+
+    public async Task<bool> DeleteUserAsync(AppUser user)
+    {
+        var result = await userManager.DeleteAsync(user);
+        if (result.Succeeded)
+            return true;
+        
+        return false;
+    }
+
+    public async Task UpdateUserAsync(AppUser user)
+    {
+        await userManager.UpdateAsync(user);
     }
 }

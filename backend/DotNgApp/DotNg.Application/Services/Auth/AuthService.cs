@@ -21,7 +21,7 @@ public class AuthService(IIdentityService identityService,
     {
         var userExists = await identityService.FindByEmailAsync(model.UserName);
         if (userExists != null)
-            return Result.Fail<LoginResponse>(new UserError(ErrorCodes.AlreadyExists, "User already exists"));
+            return Result.Fail<LoginResponse>(new UserError(ErrorCodes.AlreadyExists, UserErrorMessages.UserAlreadyExists));
 
         var user = new AppUser
         {

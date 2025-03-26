@@ -24,7 +24,7 @@ public static class DependencyInjection
     public static void ConfigureServices(this IServiceCollection services)
     {
         // Add seeders
-        //services.AddHostedService<SeederHostedService>();
+        services.AddHostedService<SeederHostedService>();
 
         // Register Service
         services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
