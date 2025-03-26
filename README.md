@@ -35,13 +35,13 @@ The frontend is developed with **Angular, Tailwind CSS, and PrimeNG**.
 ## Screenshots
 
 ### Login Page
-![Login Page](./screenshots/login.png)
+![Login Page](./screenshots/login.jpg)
 
 ### User List
-![User List](./screenshots/user-list.png)
+![User List](./screenshots/user-list.jpg)
 
 ### User Modal
-![User Modal](./screenshots/user-modal.png)
+![User Modal](./screenshots/user-modal.jpg)
 
 ## Technologies Used
 
