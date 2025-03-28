@@ -3,6 +3,7 @@ using DotNg.Application.Serialization;
 using DotNg.Application.Services;
 using DotNg.Application.Services.Auth;
 using DotNg.Application.Services.Auth.Interfaces;
+using DotNg.Application.Services.Interfaces;
 using DotNg.Domain.Interfaces;
 using DotNg.Infrastructure.Authentication.Identity;
 using DotNg.Infrastructure.Authentication.Identity.Interfaces;
@@ -17,23 +18,31 @@ public static class DependencyInjection
     {
         // Exception Handling Services
         services.AddSingleton<ResponseSerializer>();
+
+        // Add Exception Handler
         services.AddProblemDetails();
         services.AddExceptionHandler<GlobalExceptionHandler>();
+
+        //Seed Data
+        services.AddHostedService<SeederHostedService>();
+
+        //JWT
+        services.AddScoped<IJwtService, JwtService>();
+
+        //Password Hasher
+        services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
+
+        //Identity
+        services.AddScoped<IIdentityService, IdentityService>();
     }
 
     public static void ConfigureServices(this IServiceCollection services)
     {
-        // Add seeders
-        services.AddHostedService<SeederHostedService>();
-
         // Register Service
-        services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
-        services.AddScoped<IIdentityService, IdentityService>();
-        services.AddScoped<IJwtService, JwtService>();
-
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IGoogleAuthService, GoogleAuthService>();
         services.AddScoped<IFacebookAuthService, FacebookAuthService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IExcelService, ExcelService>();
     }
 }

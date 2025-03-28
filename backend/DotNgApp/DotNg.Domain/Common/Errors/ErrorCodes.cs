@@ -14,4 +14,5 @@ public static class ErrorCodes
     public const string Timeout = "timeout";
     public const string TooManyRequests = "too_many_requests";
     public const string ServiceUnavailable = "service_unavailable";
+    public const string InvalidFile = "invalid_file";
 }

@@ -3,7 +3,7 @@ using DotNg.Application.Models.RoleDto;
 using DotNg.Application.Models.UserDto;
 using DotNg.Domain.Common;
 
-namespace DotNg.Application.Services;
+namespace DotNg.Application.Services.Interfaces;
 
 public interface IUserService
 {

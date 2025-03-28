@@ -1,7 +1,6 @@
 ﻿using DotNg.Infrastructure.Authentication.Identity.Interfaces;
 using DotNg.Infrastructure.Authentication.Identity.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using System.Data;
 
 namespace DotNg.Infrastructure.Authentication.Identity;

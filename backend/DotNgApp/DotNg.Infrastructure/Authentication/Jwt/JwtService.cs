@@ -1,7 +1,6 @@
 ﻿using DotNg.Infrastructure.Authentication.Identity.Models;
 using DotNg.Infrastructure.Authentication.Jwt.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -11,14 +10,10 @@ using System.Text;
 
 namespace DotNg.Infrastructure.Authentication.Jwt;
 
-public class JwtService(IOptions<JwtOptions> options, UserManager<AppUser> userManager, IConfiguration configuration) : IJwtService
+public class JwtService(IOptions<JwtOptions> options, UserManager<AppUser> userManager) : IJwtService
 {
     public string GenerateToken(AppUser user)
     {
-        var jwtKey = configuration["Jwt:Key"];
-        var jwtIssuer = configuration["Jwt:Issuer"];
-        var jwtAudience = configuration["Jwt:Audience"];
-
         var claims = new List<Claim>
         {
              new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
@@ -33,12 +28,12 @@ public class JwtService(IOptions<JwtOptions> options, UserManager<AppUser> userM
         claims.AddRange(userRoles.Select(role => new Claim(ClaimTypes.Role, role)));
 
         var signingCredentials = new SigningCredentials(
-            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!)),
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.Value.SecretKey)),
             SecurityAlgorithms.HmacSha256);
 
         var jwt = new JwtSecurityToken(
-            issuer: jwtIssuer,
-            audience: jwtAudience,
+            issuer: options.Value.Issuer,
+            audience: options.Value.Audience,
             claims: claims,
             notBefore: DateTime.UtcNow,
             expires: DateTime.UtcNow.AddHours(10),

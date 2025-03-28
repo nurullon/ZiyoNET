@@ -2,6 +2,7 @@
 using DotNg.Application.Models;
 using DotNg.Application.Models.RoleDto;
 using DotNg.Application.Models.UserDto;
+using DotNg.Application.Services.Interfaces;
 using DotNg.Domain.Common;
 using DotNg.Domain.Common.Errors;
 using DotNg.Domain.Common.Messages;
@@ -144,16 +145,13 @@ public class UserService(IIdentityService identityService,
             {
                 Id = user.Id,
                 Name = user.Name,
-                Email = user.Email, 
+                Email = user.Email,
                 UserName = user.UserName,
                 Role = mapper.Map<RoleResponse>(role)
             });
         }
 
-        var result = new ListResponse<UserResponse>(response, 
-            totalCount, 
-            request.PageNumber, 
-            request.PageSize);
+        var result = new ListResponse<UserResponse>(response, totalCount, request.PageNumber, request.PageSize);
 
         return Result<ListResponse<UserResponse>>.Success(result);
     }

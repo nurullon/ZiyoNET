@@ -1,4 +1,5 @@
 ﻿using DotNg.Application.Models.Auth;
+using DotNg.Infrastructure.Authentication.Jwt.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -9,9 +10,8 @@ public static class AuthConfiguration
 {
     public static void ConfigureAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
-        var jwtKey = configuration["Jwt:Key"];
-        var jwtIssuer = configuration["Jwt:Issuer"];
-        var jwtAudience = configuration["Jwt:Audience"];
+        var jwtOptions = configuration.GetSection("Jwt").Get<JwtOptions>() ?? new();
+        services.Configure<JwtOptions>(configuration.GetSection("Jwt"));
 
         var googleAuthSettings = configuration.GetSection("Authentication:Google").Get<GoogleAuthSettings>();
         var facebookAuthSettings = configuration.GetSection("Authentication:Facebook").Get<FacebookAuthSettings>();
@@ -29,9 +29,9 @@ public static class AuthConfiguration
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                ValidIssuer = jwtIssuer,
-                ValidAudience = jwtAudience,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+                ValidIssuer = jwtOptions.Issuer,
+                ValidAudience = jwtOptions.Audience,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey))
             };
 
             options.Events = new JwtBearerEvents

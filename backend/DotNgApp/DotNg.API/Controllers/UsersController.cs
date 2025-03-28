@@ -1,6 +1,6 @@
 ﻿using DotNg.Application.Models.UserDto;
 using DotNg.Application.Serialization;
-using DotNg.Application.Services;
+using DotNg.Application.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
