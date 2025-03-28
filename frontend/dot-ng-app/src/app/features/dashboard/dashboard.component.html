@@ -1,11 +1,30 @@
-<div class="flex justify-end p-2">
-    <p-button (click)="openDialog()" label="Add" class="p-button-success rounded-lg"></p-button>
+<div class="flex justify-end gap-3 p-4 rounded-lg shadow">
+    <p-button (click)="openDialog()" label="Add" icon="pi pi-plus" class="p-button-primary rounded-lg"></p-button>
+
+    <input type="file" (change)="onFileSelected($event)" hidden #fileInput />
+
+    <p-button (click)="fileInput.click()" 
+              [label]="isLoading ? 'Uploading...' : 'Upload'" 
+              [disabled]="isLoading" 
+              icon="pi pi-upload"
+              class="p-button-warning rounded-lg">
+    </p-button>
+
+    <p-button (click)="downloadExcel()" 
+              label="Download" 
+              icon="pi pi-download" 
+              class="p-button-success rounded-lg">
+    </p-button>
 </div>
+
+<p-dialog [visible]="isLoading" [modal]="true" [closable]="false" [showHeader]="false">
+    <p-progress-spinner strokeWidth="8" fill="transparent" animationDuration=".5s" [style]="{ width: '50px', height: '50px' }" />
+</p-dialog>
 
 <p-table [value]="users" [paginator]="true" [rows]="pageSize" [totalRecords]="totalRecords" [lazy]="true"
     [rowsPerPageOptions]="[5, 10, 20]" [sortMode]="'single'" (onPage)="onPageChange($event)"
     (onSort)="onSortChange($event)" (onFilter)="onFilterChange($event)"
-    [globalFilterFields]="['name', 'email', 'userName']" >
+    [globalFilterFields]="['name', 'email', 'userName']">
     <ng-template pTemplate="header">
         <tr>
             <th pSortableColumn="name">Name <p-sortIcon field="name"></p-sortIcon></th>

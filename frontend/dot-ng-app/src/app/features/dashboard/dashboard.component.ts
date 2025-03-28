@@ -12,28 +12,32 @@ import { FormsModule } from '@angular/forms';
 import { PasswordModule } from 'primeng/password';
 import { DropdownModule } from 'primeng/dropdown';
 import { DividerModule } from 'primeng/divider';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { UserRequest } from '../../core/models/users/user.request';
 import { RoleResponse } from '../../core/models/roles/role.response';
+import { ExcelService } from '../../core/services/excel.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
-    TableModule, 
-    ButtonModule, 
+    TableModule,
+    ButtonModule,
     InputTextModule,
     PasswordModule,
     DropdownModule,
     DividerModule,
     FormsModule,
+    ProgressSpinnerModule,
     DialogModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class  DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit {
   users: UserResponse[] = [];
   roles: RoleResponse[] = [];
   selectedUserId: string = '';
+  isLoading: boolean = false; 
 
   totalRecords: number = 0;
   pageSize: number = 10;
@@ -52,24 +56,30 @@ export class  DashboardComponent implements OnInit {
     roleId: '',
     password: ''
   };
-  
-  constructor(private userService: UserService) {}
+
+  constructor(private userService: UserService, private excelService: ExcelService) { }
 
   async ngOnInit() {
-    await this.getUsers();
+    await this.fetchUsers();
     this.roles = await this.userService.getRoles();
   }
 
-  async getUsers() {
-    const response = await this.userService.getUsers(this.filterRequest);
-    this.users = response.data;
-    this.totalRecords = response.totalCount;
+  async fetchUsers() {
+    this.isLoading = true;
+    try {
+      const response = await this.userService.getUsers(this.filterRequest);
+      this.users = response.data;
+      this.totalRecords = response.totalCount;
+    } 
+    finally {
+      this.isLoading = false;
+    }
   }
 
   onPageChange(event: any) {
     this.filterRequest.PageNumber = event.first / event.rows + 1;
     this.filterRequest.PageSize = event.rows;
-    this.getUsers();
+    this.fetchUsers();
   }
 
   onSortChange(event: any) {
@@ -77,22 +87,21 @@ export class  DashboardComponent implements OnInit {
       this.filterRequest.SortColumn = event.field.charAt(0).toUpperCase() + event.field.slice(1);
       this.filterRequest.SortOrder = event.order === 1;
     }
-    this.getUsers();
+    this.fetchUsers();
   }
 
   filter(field: string, event: any) {
     const value = event.target.value?.trim().toLowerCase() || undefined;
     console.log(`Filtering by ${field}:`, value);
-  
+
     if (!value) {
       delete this.filterRequest[field as keyof UserFilterRequest];
     } else {
       this.filterRequest[field as keyof UserFilterRequest] = value;
     }
-  
-    this.getUsers(); 
+
+    this.fetchUsers();
   }
-  
 
   onFilterChange(event: any) {
     console.log("test");
@@ -107,17 +116,16 @@ export class  DashboardComponent implements OnInit {
       password: ''
     };
     this.selectedUserId = user?.id || '';
-  
+
     this.visible = true;
   }
 
- async deleteUser(id: string) {
+  async deleteUser(id: string) {
     var result = await this.userService.deleteUser(id);
     if (result) {
-      this.getUsers();
+      this.fetchUsers();
     }
-    else
-    {
+    else {
       alert("Error deleting user");
     }
   }
@@ -130,6 +138,35 @@ export class  DashboardComponent implements OnInit {
       await this.userService.createUser(this.user);
     }
     this.visible = false;
-    this.getUsers();
+    this.fetchUsers();
+  }
+
+  async onFileSelected(event: any) {
+    const file: File = event.target.files[0];
+    if (!file) return;
+
+    this.isLoading = true;
+
+    try {
+      await this.excelService.uploadExcel(file);
+      console.log('Upload successful');
+
+    } catch (error) {
+      console.error('Upload failed', error);
+    } finally {
+      await this.fetchUsers();
+      this.isLoading = false;
+    }
+  }
+
+  async downloadExcel(){
+    this.isLoading = true;
+    try {
+      await this.excelService.downloadAndOpenExcel();
+    } 
+    finally {
+      await this.fetchUsers();
+      this.isLoading = false;
+    }
   }
 }

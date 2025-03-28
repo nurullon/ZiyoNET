@@ -7,5 +7,10 @@ export const API_ROUTES = {
       API_USERS: 'api/users',
       API_ROLES: 'api/users/roles',
     },
+
+    EXCEL: {
+      UPLOAD: 'api/excel/upload',
+      DOWNLOAD: 'api/excel/download',
+    },
   };
   
