@@ -4,4 +4,5 @@ export interface UserRequest {
     userName: string;
     roleId: string;
     password: string;
+    profileImage: File | null;
 }

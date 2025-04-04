@@ -41,13 +41,14 @@ export class UserService {
     };
   }
 
-  async createUser(user: UserRequest): Promise<boolean> {
-    const result = await this.apiService.post(API_ROUTES.USERS.API_USERS, user);
+
+  async createUser(userFormData: FormData): Promise<boolean> {
+    const result = await this.apiService.post(API_ROUTES.USERS.API_USERS, userFormData);
     return result.success;
   }
 
-  async updateUser(id: string, user: UserRequest): Promise<boolean> {
-    const result = await this.apiService.put(`${API_ROUTES.USERS.API_USERS}/${id}`, user);
+  async updateUser(id: string, userFormData: FormData): Promise<boolean> {
+    const result = await this.apiService.put(`${API_ROUTES.USERS.API_USERS}/${id}`, userFormData);
     return result.success;
   }
 

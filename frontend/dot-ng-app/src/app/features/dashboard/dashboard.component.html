@@ -1,95 +1,142 @@
 <div class="flex justify-end gap-3 p-4 rounded-lg shadow">
-    <p-button (click)="openDialog()" label="Add" icon="pi pi-plus" class="p-button-primary rounded-lg"></p-button>
+  <p-button (click)="openDialog()" label="Add" icon="pi pi-plus" class="p-button-primary rounded-lg"></p-button>
 
-    <input type="file" (change)="onFileSelected($event)" hidden #fileInput />
+  <input type="file" (change)="onFileSelected($event)" hidden #fileInput />
 
-    <p-button (click)="fileInput.click()" 
-              [label]="isLoading ? 'Uploading...' : 'Upload'" 
-              [disabled]="isLoading" 
-              icon="pi pi-upload"
-              class="p-button-warning rounded-lg">
-    </p-button>
+  <p-button (click)="fileInput.click()" [label]="isLoading ? 'Uploading...' : 'Upload'" [disabled]="isLoading"
+    icon="pi pi-upload" class="p-button-warning rounded-lg">
+  </p-button>
 
-    <p-button (click)="downloadExcel()" 
-              label="Download" 
-              icon="pi pi-download" 
-              class="p-button-success rounded-lg">
-    </p-button>
+  <p-button (click)="downloadExcel()" label="Download" icon="pi pi-download" class="p-button-success rounded-lg">
+  </p-button>
 </div>
 
 <p-dialog [visible]="isLoading" [modal]="true" [closable]="false" [showHeader]="false">
-    <p-progress-spinner strokeWidth="8" fill="transparent" animationDuration=".5s" [style]="{ width: '50px', height: '50px' }" />
+  <p-progress-spinner strokeWidth="8" fill="transparent" animationDuration=".5s"
+    [style]="{ width: '50px', height: '50px' }" />
 </p-dialog>
 
 <p-table [value]="users" [paginator]="true" [rows]="pageSize" [totalRecords]="totalRecords" [lazy]="true"
-    [rowsPerPageOptions]="[5, 10, 20]" [sortMode]="'single'" (onPage)="onPageChange($event)"
-    (onSort)="onSortChange($event)" (onFilter)="onFilterChange($event)"
-    [globalFilterFields]="['name', 'email', 'userName']">
-    <ng-template pTemplate="header">
-        <tr>
-            <th pSortableColumn="name">Name <p-sortIcon field="name"></p-sortIcon></th>
-            <th pSortableColumn="email">Email <p-sortIcon field="email"></p-sortIcon></th>
-            <th pSortableColumn="userName">User Name <p-sortIcon field="userName"></p-sortIcon></th>
-            <th>Role</th>
-            <th>Actions</th>
-        </tr>
-        <tr>
-            <th><input type="text" pInputText (input)="filter('Name', $event)" placeholder="Search Name"></th>
-            <th><input type="text" pInputText (input)="filter('Email', $event)" placeholder="Search Email"></th>
-            <th><input type="text" pInputText (input)="filter('UserName', $event)" placeholder="Search User Name"></th>
-            <th></th>
-            <th></th>
-        </tr>
-    </ng-template>
-    <ng-template pTemplate="body" let-user>
-        <tr>
-            <td>{{ user.name }}</td>
-            <td>{{ user.email }}</td>
-            <td>{{ user.userName }}</td>
-            <td>{{ user.role?.name }}</td>
-            <td>
-                <button pButton type="button" icon="pi pi-pencil" class="p-button-rounded p-button-warning"
-                    (click)="openDialog(user)"></button>
-                <button pButton type="button" icon="pi pi-trash" class="p-button-rounded p-button-danger"
-                    (click)="deleteUser(user.id)"></button>
-            </td>
-        </tr>
-    </ng-template>
+  [rowsPerPageOptions]="[5, 10, 20]" [sortMode]="'single'" (onPage)="onPageChange($event)"
+  (onSort)="onSortChange($event)" (onFilter)="onFilterChange($event)"
+  [globalFilterFields]="['name', 'email', 'userName']">
+  <ng-template pTemplate="header">
+    <tr>
+      <th>Image</th>
+      <th pSortableColumn="name">Name <p-sortIcon field="name"></p-sortIcon></th>
+      <th pSortableColumn="email">Email <p-sortIcon field="email"></p-sortIcon></th>
+      <th pSortableColumn="userName">User Name <p-sortIcon field="userName"></p-sortIcon></th>
+      <th>Role</th>
+      <th>Actions</th>
+    </tr>
+    <tr>
+      <th></th>
+      <th><input type="text" pInputText (input)="filter('Name', $event)" placeholder="Search Name"></th>
+      <th><input type="text" pInputText (input)="filter('Email', $event)" placeholder="Search Email"></th>
+      <th><input type="text" pInputText (input)="filter('UserName', $event)" placeholder="Search User Name"></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-user>
+    <tr>
+      <td>
+        <div class="flex justify-center">
+          @if (user.profileImageUrl) {
+            
+          <img [src]="baseUrl + '/' + user.profileImageUrl" alt="Profile Image"
+            class="w-10 h-10 object-cover rounded-full border-2 border-gray-300" />
+          } @else {
+          <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+            <span class="text-gray-500 text-xs">No Image</span>
+          </div>
+          }
+        </div>
+      </td>
+
+      <td>{{ user.name }}</td>
+      <td>{{ user.email }}</td>
+      <td>{{ user.userName }}</td>
+      <td>{{ user.role?.name }}</td>
+      <td>
+        <button pButton type="button" icon="pi pi-pencil" class="p-button-rounded p-button-warning"
+          (click)="openDialog(user)"></button>
+        <button pButton type="button" icon="pi pi-trash" class="p-button-rounded p-button-danger"
+          (click)="deleteUser(user.id)"></button>
+      </td>
+    </tr>
+  </ng-template>
 </p-table>
 
-<p-dialog header="User Profile" [modal]="true" [(visible)]="visible" [style]="{ width: '25rem' }"
-    aria-labelledby="edit-profile-dialog">
-    <div class="space-y-4">
-        <div class="flex items-center gap-4">
-            <label for="username" class="font-semibold w-28">Username</label>
-            <input pInputText id="username" class="flex-auto" [(ngModel)]="user.userName" autocomplete="off" />
+<p-dialog header="User Profile" [modal]="true" [(visible)]="visible" [style]="{ width: '50rem' }"
+  aria-labelledby="edit-profile-dialog">
+  <div class="flex gap-6">
+    <div class="w-1/3 flex flex-col items-center space-y-4">
+      @if (imagePreviewUrl) {
+      <div class="flex justify-center">
+        <img [src]="imagePreviewUrl" alt="Profile preview"
+          class="w-40 h-40 object-cover rounded-md border-2 border-gray-300 shadow-md" />
+      </div>
+      } @else {
+      <div class="flex justify-center">
+        <div
+          class="w-40 h-40 bg-gray-200 rounded-md border-2 border-gray-300 shadow-md flex items-center justify-center">
+          <span class="text-gray-500 text-lg">No Image</span>
         </div>
+      </div>
+      }
 
-        <div class="flex items-center gap-4">
-            <label for="email" class="font-semibold w-28">Email</label>
-            <input pInputText id="email" class="flex-auto" [(ngModel)]="user.email" autocomplete="off" />
-        </div>
-
-        <div class="flex items-center gap-4">
-            <label for="name" class="font-semibold w-28">Name</label>
-            <input pInputText id="name" class="flex-auto" [(ngModel)]="user.name" autocomplete="off" />
-        </div>
-
-        <div class="flex items-center gap-4">
-            <label for="role" class="font-semibold w-28">Role</label>
-            <p-dropdown id="role" class="flex-auto" [options]="roles" [(ngModel)]="user.roleId" optionLabel="name"
-                optionValue="id" placeholder="Select a role"></p-dropdown>
-        </div>
-
-        <div class="flex items-center gap-4">
-            <label for="password" class="font-semibold w-28">Password</label>
-            <input pInputText id="password" type="password" class="flex-auto" [(ngModel)]="user.password"
-                autocomplete="off" />
-        </div>
+      <p-fileUpload name="image" mode="basic" [auto]="false" customUpload="true"
+        (onSelect)="handleImageSelection($event)" [showUploadButton]="false" [showCancelButton]="false" accept="image/*"
+        chooseLabel="Upload Photo" class="w-full"></p-fileUpload>
     </div>
 
-    <div class="flex justify-end gap-2 mt-6">
-        <p-button label="Cancel" severity="secondary" (click)="visible = false" />
-        <p-button label="Save" (click)="saveUser()" />
+    <div class="w-2/3 space-y-4">
+      <div class="flex items-center gap-4">
+        <label for="username" class="font-semibold w-28">Username</label>
+        <input pInputText id="username" class="flex-auto" [(ngModel)]="user.userName" autocomplete="off" />
+      </div>
+
+      <div class="flex items-center gap-4">
+        <label for="email" class="font-semibold w-28">Email</label>
+        <input pInputText id="email" class="flex-auto" [(ngModel)]="user.email" autocomplete="off" />
+      </div>
+
+      <div class="flex items-center gap-4">
+        <label for="name" class="font-semibold w-28">Name</label>
+        <input pInputText id="name" class="flex-auto" [(ngModel)]="user.name" autocomplete="off" />
+      </div>
+
+      <div class="flex items-center gap-4">
+        <label for="role" class="font-semibold w-28">Role</label>
+        <p-dropdown id="role" class="flex-auto" [options]="roles" [(ngModel)]="user.roleId" optionLabel="name"
+          optionValue="id" placeholder="Select a role"></p-dropdown>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <label for="password" class="font-semibold w-28">Password</label>
+        <input pInputText id="password" class="flex-auto" [(ngModel)]="user.password" autocomplete="off" />
+      </div>
     </div>
+  </div>
+
+  <div class="flex justify-end gap-2 mt-6">
+    <p-button label="Cancel" severity="secondary" (click)="visible = false" />
+    <p-button label="Save" (click)="saveUser()" />
+  </div>
 </p-dialog>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
