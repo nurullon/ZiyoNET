@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DotNg.Application.Extensions;
 using DotNg.Application.Models;
 using DotNg.Application.Models.RoleDto;
 using DotNg.Application.Models.UserDto;
@@ -11,7 +12,6 @@ using DotNg.Infrastructure.Authentication.Identity.Interfaces;
 using DotNg.Infrastructure.Authentication.Identity.Models;
 using DotNg.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Data;
 
 namespace DotNg.Application.Services;
@@ -28,11 +28,18 @@ public class UserService(IIdentityService identityService,
                 ErrorCodes.AlreadyExists, 
                 UserErrorMessages.UserAlreadyExists));
 
+        string? imageUrl = null;
+        if (request.ProfileImage != null)
+        {
+            imageUrl = await request.ProfileImage.SaveUserImageAsync();
+        }
+
         var user = new AppUser
         {
             Name = request.Name,
             Email = request.Email,
-            UserName = request.UserName
+            UserName = request.UserName,
+            ProfileImageUrl = imageUrl,
         };
 
         var result = await identityService.CreateUserAsync(user, request.Password);
@@ -55,6 +62,7 @@ public class UserService(IIdentityService identityService,
             Name = user.Name,
             Email = user.Email,
             UserName = user.UserName,
+            ProfileImageUrl = user.ProfileImageUrl,
             Role = mapper.Map<RoleResponse>(role)
         });
     }
@@ -75,6 +83,7 @@ public class UserService(IIdentityService identityService,
             Name = user.Name,
             Email = user.Email,
             UserName = user.UserName,
+            ProfileImageUrl = user.ProfileImageUrl,
             Role = mapper.Map<RoleResponse>(role)
         });
     }
@@ -90,11 +99,18 @@ public class UserService(IIdentityService identityService,
         user.Name = request.Name;
         user.Email = request.Email;
         user.UserName = request.UserName;
+        if (request.ProfileImage != null)
+        {
+            if (!string.IsNullOrEmpty(user.ProfileImageUrl))
+                FileStorageExtensions.DeleteUserImage(user.ProfileImageUrl);
 
-        await identityService.UpdateUserAsync(user);
+            user.ProfileImageUrl = await request.ProfileImage.SaveUserImageAsync(user.ProfileImageUrl);
+        }
 
         if (!string.IsNullOrEmpty(request.Password))
             user.PasswordHash = passwordHasher.HashPassword(request.Password);
+
+        await identityService.UpdateUserAsync(user);
 
         var role = await identityService.GetRoles().FirstOrDefaultAsync(r => r.Id == request.RoleId);
         if (role == null)
@@ -110,6 +126,7 @@ public class UserService(IIdentityService identityService,
             Name = user.Name,
             Email = user.Email,
             UserName = user.UserName,
+            ProfileImageUrl = user.ProfileImageUrl,
             Role = mapper.Map<RoleResponse>(role)
         });
     }
@@ -147,6 +164,7 @@ public class UserService(IIdentityService identityService,
                 Name = user.Name,
                 Email = user.Email,
                 UserName = user.UserName,
+                ProfileImageUrl = user.ProfileImageUrl,
                 Role = mapper.Map<RoleResponse>(role)
             });
         }

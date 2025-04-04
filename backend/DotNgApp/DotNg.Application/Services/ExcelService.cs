@@ -114,12 +114,7 @@ public class ExcelService(IIdentityService identityService) : IExcelService
             var result = await identityService.CreateUserAsync(user, password);
             if (!result.Succeeded)
             {
-                //return Result.Fail<bool>(new ExcelError(
-                //    ErrorCodes.ValidationError,
-                //    result.Errors.First().Description));
-
-                Console.WriteLine(result.Errors.First().Description);
-
+                Console.WriteLine("Existing User: ", result.Errors.First().Description);
                 continue;
             }
 

@@ -13,13 +13,13 @@ public class UsersController(IUserService userService,
     ResponseSerializer responseSerializer) : Controller
 {
     [HttpPost]
-    public async Task<IActionResult> CreateUser([FromBody] UserRequest request)
+    public async Task<IActionResult> CreateUser([FromForm] UserRequest request)
     {
         return responseSerializer.ToActionResult(await userService.CreateUserAsync(request));
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateUser(string id, [FromBody] UserRequest request)
+    public async Task<IActionResult> UpdateUser(string id, [FromForm] UserRequest request)
     {
         return responseSerializer.ToActionResult(await userService.UpdateUserAsync(id, request));
     }

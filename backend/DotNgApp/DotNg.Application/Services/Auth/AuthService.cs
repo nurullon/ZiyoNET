@@ -27,7 +27,7 @@ public class AuthService(IIdentityService identityService,
         {
             UserName = model.UserName,
             Email = model.UserName,
-            Name = model.Name ?? string.Empty
+            Name = model.Name ?? string.Empty,
         };
 
         var result = await identityService.CreateUserAsync(user, model.Password);
